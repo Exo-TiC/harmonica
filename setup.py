@@ -1,19 +1,19 @@
-from setuptools import setup
+from setuptools import setup, find_packages
 from pybind11.setup_helpers import Pybind11Extension, build_ext
 
 
 ext_modules = [
     Pybind11Extension(
-        "harmonica/bindings",
+        "harmonica.core.bindings",
         [
              'harmonica/orbit/kepler.cpp',
              'harmonica/orbit/trajectories.cpp',
              'harmonica/orbit/gradients.cpp',
              'harmonica/light_curve/fluxes.cpp',
              'harmonica/light_curve/gradients.cpp',
-             'harmonica/bindings.cpp'
+             'harmonica/core/bindings.cpp'
          ],
-        include_dirs=["vendor/eigen", "vendor/pybind11"],
+        include_dirs=["vendor/eigen", "vendor/pybind11", "harmonica"],
         language="c++",
         extra_compile_args=["-O2", "-ffast-math"]
     ),
@@ -21,16 +21,17 @@ ext_modules = [
 
 setup(
     name="planet-harmonica",
-    version="0.1.1",
+    version="0.2.1",
     author="David Grant",
     author_email="david.grant@bristol.ac.uk",
     url="https://github.com/DavoGrant/harmonica",
     license="MIT",
-    packages=["harmonica", "harmonica.jax"],
+    packages=find_packages(where="."),
+    include_package_data=True,
     description="Light curves for exoplanet transmission mapping.",
     long_description="Light curves for exoplanet transmission mapping.",
     python_requires=">=3.6",
-    install_requires=["numpy", "jax", "jaxlib"],
+    install_requires=["numpy", "jax>=0.5.3", "jaxlib>=0.5.3"],
     cmdclass={"build_ext": build_ext},
     ext_modules=ext_modules,
     classifiers=[

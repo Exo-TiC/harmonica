@@ -100,7 +100,7 @@ void FluxDerivatives::transit_flux_and_derivatives(
 
 
 void FluxDerivatives::find_intersections_theta(
-    const double d, const double nu) {
+    const double d, const double z, const double nu) {
 
   // Check cases where no obvious intersections, avoiding eigenvalue runtime.
   if (this->no_obvious_intersections(d, nu)) {
@@ -145,7 +145,7 @@ void FluxDerivatives::find_intersections_theta(
 
   if (m_theta.size() == 0) {
     // No roots, check which trivial case this configuration corresponds to.
-    if (this->trivial_configuration(d, nu)) {
+    if (this->trivial_configuration(d, z, nu)) {
       m_dthetas_dd = {0., 0.};
       m_dthetas_dnu = {0., 0.};
       for (int n = -m_N_c; n < m_N_c + 1; n++) {

@@ -1,7 +1,7 @@
 #include <pybind11/numpy.h>
 #include <pybind11/pybind11.h>
 
-#include "bindings.hpp"
+#include "core/bindings.hpp"
 #include "constants/constants.hpp"
 #include "orbit/trajectories.hpp"
 #include "orbit/gradients.hpp"

@@ -68,7 +68,8 @@ class FluxDerivatives : public Fluxes {
      * These pairs are assigned as either planet=0, entire_planet=1,
      * star=2, entire_star=3, or beyond=4 (flux=0).
      */
-    void find_intersections_theta(const double d, const double nu) override final;
+    void find_intersections_theta(const double d, const double z,
+                                  const double nu) override final;
 
     /**
      * Compute the line integrals s_n along a segment of the

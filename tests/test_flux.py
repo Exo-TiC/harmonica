@@ -1,7 +1,7 @@
 import unittest
 import numpy as np
 
-from harmonica import bindings
+from harmonica.core import bindings
 from harmonica import HarmonicaTransit
 
 

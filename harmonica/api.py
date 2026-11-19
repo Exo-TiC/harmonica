@@ -1,5 +1,5 @@
 import numpy as np
-from harmonica import bindings
+from harmonica.core import bindings
 
 
 class HarmonicaTransit(object):
@@ -41,6 +41,7 @@ class HarmonicaTransit(object):
 
         # Planet parameters.
         self._r = None
+        self._flip_r = False
         self._time_dep_strings = False
 
         # Precision: number of legendre roots at centre and edges.
@@ -130,27 +131,43 @@ class HarmonicaTransit(object):
             equal to the number of model evaluation times.
 
         """
+        # Make a copy of the input array to avoid modifying the original.
+        r = r.copy()
+
         if r.ndim == 1:
             self._time_dep_strings = False
+
+            # Flip the transit upside-down if needed.
+            self._flip_r = r[0] < 0
+            if self._flip_r:
+                r[0] *= -1
+
+            # Require odd N coeffs.
             if not r.shape[0] % 2:
-                # Require odd N coeffs.
                 r = np.append(r, 0.)
+
+            # Require Nth coeffs not both zero.
             while not np.any(r[-2:]):
-                # Require Nth coeffs not both zero.
                 r = r[:-2]
+
             self._r = np.ascontiguousarray(r, dtype=np.float64)
 
         else:
             self._time_dep_strings = True
+
+            # Flip the transit upside-down if needed.
+            self._flip_r = r[:, 0] < 0
+            r[self._flip_r, 0] *= -1
+
+            # Require odd N coeffs.
             if not r.shape[1] % 2:
-                # Require odd N coeffs.
                 r = np.c_[r, np.zeros(r.shape[0])]
 
+            # Require Nth coeffs not both zero.
             self._r = []
             for m in range(r.shape[0]):
                 self._r.append(np.ascontiguousarray(r[m], dtype=np.float64))
                 while not np.any(self._r[m][-2:]):
-                    # Require Nth coeffs not both zero.
                     self._r[m] = self._r[m][:-2]
 
     def get_transit_light_curve(self):
@@ -167,6 +184,8 @@ class HarmonicaTransit(object):
                 self._t0, self._period, self._a, self._inc, self._ecc,
                 self._omega, self._ld_mode, self._u, self._r,
                 self.times, self.fs, self._pnl_c, self._pnl_e)
+            if self._flip_r:
+                self.fs = 2.0 - self.fs
         else:
             for i in range(self.times.shape[0]):
                 t = np.array([self.times[i]])
@@ -175,7 +194,10 @@ class HarmonicaTransit(object):
                     self._t0, self._period, self._a, self._inc, self._ecc,
                     self._omega, self._ld_mode, self._u, self._r[i],
                     t, f, self._pnl_c, self._pnl_e)
-                self.fs[i] = f
+                self.fs[i] = f[0]
+
+                if self._flip_r[i]:
+                    self.fs[i] = 2.0 - self.fs[i]
 
         return np.copy(self.fs)
 
@@ -193,8 +215,8 @@ class HarmonicaTransit(object):
         -------
         if r.ndim == 1:
             r_p : ndarray (N,)
-                The transmission string, :math:`r_{\\rm{p}}(\\theta)`, evaluated
-                at N thetas.
+                The transmission string, :math:`r_{\\rm{p}}(\\theta)`,
+                evaluated at N thetas.
         elif r.ndim == 2:
             r_p : ndarray (M, N)
                 The transmission strings, :math:`r_{\\rm{p}}(\\theta)`, each
